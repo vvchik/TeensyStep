@@ -3,6 +3,8 @@
 #include "ErrorHandler.h"
 #include "Stepper.h"
 #include "timer/TF_Handler.h"
+#include "TeensyTimerTool.h"
+using namespace TeensyTimerTool;
 
 namespace TeensyStep{
 
@@ -68,6 +70,9 @@ namespace TeensyStep{
 
         inline mcErr err(mcErr code) const { return (mcErr)error(errModule::MC, (int)code); }
 
+        PeriodicTimer accTmr;
+        OneShotTimer pulseTimer;
+
         MotorControlBase(const MotorControlBase&) = delete;
         MotorControlBase& operator=(const MotorControlBase&) = delete;
     };
@@ -94,10 +99,10 @@ namespace TeensyStep{
 
     template <typename t>
     MotorControlBase<t>::MotorControlBase(unsigned pulseWidth, unsigned accUpdatePeriod)
-        : timerField(this), mCnt(0)
+        : timerField(this), mCnt(0), accTmr(FTM0), pulseTimer(FTM0)
     {        
-        timerField.setPulseWidth(pulseWidth);
-        timerField.setAccUpdatePeriod(accUpdatePeriod);
+        //timerField.setPulseWidth(pulseWidth);
+        //timerField.setAccUpdatePeriod(accUpdatePeriod);
         this->accUpdatePeriod = accUpdatePeriod;
         this->pulseWidth = pulseWidth;
     }
@@ -123,8 +128,8 @@ namespace TeensyStep{
                 (*slave)->B -= leadMotor->A;
             }
             (*slave)->B += (*slave)->A;
-        }
-        timerField.triggerDelay(); // start delay line to dactivate all step pins
+        }        
+        pulseTimer.trigger(pulseWidth);
 
         if (mode == Mode::target && (leadMotor->current == leadMotor->target)) // stop timer and call callback if we reached target
         {

@@ -1,7 +1,7 @@
+#pragma once
+
 namespace TeensyStep
 {
-
-constexpr const char *version = "V2.1";
-constexpr const char *branch = "devTimer";
-
-} // namespace TeensyStep
+    constexpr const char* version = "D3.0";
+    constexpr const char* branch = "feature/TeensyTimerTool";
+} 

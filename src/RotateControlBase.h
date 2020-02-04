@@ -45,13 +45,13 @@ namespace TeensyStep
     RotateControlBase<a, t>::RotateControlBase(unsigned pulseWidth, unsigned accUpdatePeriod)
         : MotorControlBase<t>(pulseWidth, accUpdatePeriod)
     {
-        this->mode = MotorControlBase<t>::Mode::notarget;
+        this->mode = MotorControlBase<t>::Mode::notarget;        
     }
 
     template <typename a, typename t>
     void RotateControlBase<a, t>::doRotate(int N, float speedFactor)
     {
-        if(this->isRunning())
+        if (this->isRunning())
         {
             this->err(mcErr::alrdyMoving);
             return;
@@ -78,7 +78,9 @@ namespace TeensyStep
         isStopping = false;
         this->timerField.begin();
         accelerator.prepareRotation(this->leadMotor->current, this->leadMotor->vMax, acceleration, this->accUpdatePeriod, speedFactor);
-        this->timerField.accTimerStart();
+        //this->timerField.accTimerStart();
+        this->pulseTimer.begin([this] {this->pulseTimerISR();});
+        this->accTmr.begin([this] { this->accTimerISR(); }, this->accUpdatePeriod);
     }
 
     // ISR -----------------------------------------------------------------------------------------------------------

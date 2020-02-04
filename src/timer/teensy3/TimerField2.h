@@ -2,13 +2,13 @@
 
 #include "../TF_Handler.h"
 #include "PIT.h"
-#include "TeensyStepFTM.h"
+//#include "TeensyStepFTM.h"
 
 //===================================================================
 // Teensy 3.X
 //===================================================================
 
-class TimerField : public IDelayHandler
+class TimerField //: public IDelayHandler
 {
  public:
     inline TimerField(TeensyStep::TF_Handler*);
@@ -24,23 +24,15 @@ class TimerField : public IDelayHandler
     inline bool stepTimerIsAllocated() const;
     inline void setStepFrequency(unsigned f);
     inline unsigned getStepFrequency();
-
-    inline void accTimerStart();
-    inline void accTimerStop();
-    inline void setAccUpdatePeriod(unsigned period);
-
-    inline void setPulseWidth(unsigned delay);
-    inline void triggerDelay();
-    inline void delayISR(unsigned channel);
-
+   
  protected:
     TeensyStep::PIT stepTimer;
     TeensyStep::TF_Handler* handler;
 
     unsigned delayWidth;
-    unsigned accUpdatePeriod;
+    //unsigned accUpdatePeriod;
 
-    unsigned accLoopDelayChannel;
+    //unsigned accLoopDelayChannel;
     unsigned pinResetDelayChannel;
 
     bool lastPulse = false;
@@ -61,9 +53,9 @@ bool TimerField::begin()
 {
     //digitalWriteFast(4,HIGH);
     lastPulse = false;
-    accLoopDelayChannel = TeensyStepFTM::addDelayChannel(this);
-    pinResetDelayChannel = TeensyStepFTM::addDelayChannel(this);
-    TeensyStepFTM::begin();
+    //accLoopDelayChannel = TeensyStepFTM::addDelayChannel(this);
+    //pinResetDelayChannel = TeensyStepFTM::addDelayChannel(this);
+    //TeensyStepFTM::begin();
     return stepTimer.begin(handler) == TeensyStep::pitErr::OK;
 }
 
@@ -71,8 +63,8 @@ bool TimerField::begin()
 void TimerField::end()
 {
     stepTimer.end();
-    TeensyStepFTM::removeDelayChannel(accLoopDelayChannel);
-    TeensyStepFTM::removeDelayChannel(pinResetDelayChannel);
+    //TeensyStepFTM::removeDelayChannel(accLoopDelayChannel);
+    //TeensyStepFTM::removeDelayChannel(pinResetDelayChannel);
 }
 
 void TimerField::endAfterPulse()
@@ -142,51 +134,3 @@ bool TimerField::stepTimerIsAllocated() const
     return stepTimer.isAllocated();
 }
 
-// Acceleration Timer ------------------------------------------------------
-
-void TimerField::accTimerStart()
-{
-    TeensyStepFTM::trigger(accUpdatePeriod, accLoopDelayChannel);
-}
-
-void TimerField::setAccUpdatePeriod(unsigned p)
-{
-    accUpdatePeriod = TeensyStepFTM::microsToReload(p);
-}
-
-void TimerField::accTimerStop()
-{
-    accUpdatePeriod = 0;
-}
-
-// Delay Timer ------------------------------------------------------
-
-void TimerField::setPulseWidth(unsigned delay)
-{
-    delayWidth = TeensyStepFTM::microsToReload(delay);
-}
-
-void TimerField::triggerDelay()
-{
-    TeensyStepFTM::trigger(delayWidth, pinResetDelayChannel);
-}
-
-void TimerField::delayISR(unsigned channel)
-{
-    if (channel == pinResetDelayChannel)
-    {
-        handler->pulseTimerISR();
-        if (lastPulse) end();
-    }
-
-    else if (channel == accLoopDelayChannel)
-    {
-        if (accUpdatePeriod == 0) return;
-
-        noInterrupts();
-        TeensyStepFTM::trigger(accUpdatePeriod, accLoopDelayChannel);
-        interrupts();
-
-        handler->accTimerISR();
-    }
-}

@@ -59,7 +59,7 @@ namespace TeensyStep
         // set callback function to be called when target is reached
         void setCallback(void (*_callback)()) { this->callback = _callback; }
 
-     protected:
+     protected:      
         void accTimerISR();
 
         void doMove(int N, float speedOverride = 1.0f);
@@ -104,7 +104,8 @@ namespace TeensyStep
 
         this->timerField.setStepFrequency(accelerator.prepareMovement(this->leadMotor->current, this->leadMotor->target, targetSpeed, pullInSpeed, pullOutSpeed, acceleration));
         this->timerField.stepTimerStart();
-        this->timerField.accTimerStart();
+        //this->timerField.accTimerStart();
+        this->accTmr.begin([this] { this->accTimerISR(); }, this->accUpdatePeriod);
     }
 
     // ISR -----------------------------------------------------------------------------------------------------------

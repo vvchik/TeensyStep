@@ -10,7 +10,7 @@
 #include "version.h"
 //#include "accelerators/SinRotAccelerator.h"
 
-#include "timer/generic/TimerField.h"
+//#include "timer/generic/TimerField.h"
 
 // TEENSY 3.0 - Teensy 3.6 ==================================================================================
 
@@ -40,8 +40,8 @@
 using RotateControl = TeensyStep::RotateControlBase<LinRotAccelerator, TimerField>;
 using StepControl = TeensyStep::StepControlBase<LinStepAccelerator, TimerField>;
 
-using StepControlTick = TeensyStep::StepControlBase<LinStepAccelerator, TickTimerField>;
-using RotateControlTick = TeensyStep::RotateControlBase<LinStepAccelerator, TickTimerField>;
+// using StepControlTick = TeensyStep::StepControlBase<LinStepAccelerator, TickTimerField>;
+// using RotateControlTick = TeensyStep::RotateControlBase<LinStepAccelerator, TickTimerField>;
 
 // Sine acceleration -------------------------------------------------------------------------------------------
 
